@@ -3,7 +3,7 @@ name: Build pkg file
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
   workflow_dispatch:
 env:
   PACKAGING_REPO: https://github.com/osquery/osquery-packaging
@@ -376,6 +376,8 @@ jobs:
         run: |
           pip3 install pyinstaller
           pip3 install requests
+          pip3 install rumps
+
           pip3 install packaging
       - name: create vistar agent app
         shell: bash
@@ -397,7 +399,7 @@ jobs:
         shell: bash
         run: |
           osquery_version="5.10.2"
-          package_format="DragNDrop"
+          package_format="productbuild"
 
           cmake -DCMAKE_BUILD_TYPE=Release \
             -DCPACK_GENERATOR=${package_format} \
@@ -414,14 +416,14 @@ jobs:
       - name: Rename package file
         shell: bash
         run: |
-          mv package_build/*.dmg package_build/Vistar.dmg
+          mv package_build/*.pkg package_build/Vistar-1.pkg
           # hdiutil create -srcfolder package_build/Vistar.pkg -format UDZO -volname "Vistar" Vistar.dmg
           
       - name: Upload Artifact
         uses: actions/upload-artifact@v2
         with:
           name: Vistar 1
-          path: package_build/Vistar.dmg
+          path: package_build/*.pkg
 
       # - name: Locate the packages
         # id: packages
