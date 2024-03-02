@@ -1,0 +1,20 @@
+
+#
+
+if(OSQUERY_BITNESS STREQUAL "32")
+  set(CPACK_WIX_SIZEOF_VOID_P "4")
+
+elseif(OSQUERY_BITNESS STREQUAL "64")
+  set(CPACK_WIX_SIZEOF_VOID_P "8")
+
+else()
+  message(FATAL_ERROR "The OSQUERY_BITNESS variable must be set to either 32 or 64 according to the build type")
+endif()
+
+set(CPACK_WIX_PRODUCT_ICON "${OSQUERY_DATA_PATH}/control/osquery.ico")
+set(CPACK_WIX_UI_BANNER "${CMAKE_SOURCE_DIR}/osquery-packaging/banner.bmp")
+set(CPACK_WIX_UI_DIALOG "${CMAKE_SOURCE_DIR}/osquery-packaging/Vistar.bmp")
+set(CPACK_WIX_UPGRADE_GUID "ea6c7327-461e-4033-847c-acdf2b85dede")
+set(CPACK_WIX_PATCH_FILE "${CMAKE_SOURCE_DIR}/osquery-packaging/osquery_wix_patch.xml")
+set(CPACK_PACKAGE_INSTALL_DIRECTORY "vistar")
+set(CPACK_WIX_EXTENSIONS "WixUtilExtension")

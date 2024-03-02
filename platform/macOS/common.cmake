@@ -1,0 +1,38 @@
+
+set(OSQUERY_PACKAGE_RELEASE "1.macos")
+set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}")
+set(CPACK_SET_DESTDIR ON)
+
+install(
+  FILES
+    "${OSQUERY_DATA_PATH}/opt/osquery/bin/osqueryi"
+
+  DESTINATION
+    "/Applications/Vistar.app/Contents/MacOS/"
+
+  PERMISSIONS
+    OWNER_EXECUTE OWNER_WRITE OWNER_READ
+    GROUP_EXECUTE GROUP_READ
+    WORLD_EXECUTE WORLD_READ
+
+  COMPONENT
+    osquery
+)
+
+install(
+  FILES
+    "${CMAKE_SOURCE_DIR}/dist/Vistar"
+
+  DESTINATION
+    "/Applications/Vistar.app/Contents/MacOS/"
+
+  PERMISSIONS
+    OWNER_EXECUTE OWNER_WRITE OWNER_READ
+    GROUP_EXECUTE GROUP_READ
+    WORLD_EXECUTE WORLD_READ
+
+  COMPONENT
+    osquery
+)
+
+
