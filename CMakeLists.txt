@@ -32,6 +32,7 @@ include("platform/macos/common.cmake")
 
 string(TOLOWER "${CPACK_GENERATOR}" generator_name)
 include("platform/macos/productbuild.cmake")
+set(CPACK_PACKAGE_NAME "Vistar")
 
 include(CPack)
 

@@ -405,7 +405,6 @@ jobs:
             -DCPACK_GENERATOR=${package_format} \
             -DOSQUERY_PACKAGE_VERSION=${osquery_version} \
             -DOSQUERY_DATA_PATH=$(pwd)/universal \
-            -DBACKGROUND=osquery-package/Resources \
             -S osquery-packaging \
             -B package_build
 
