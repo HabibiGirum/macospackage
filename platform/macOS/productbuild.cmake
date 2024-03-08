@@ -29,10 +29,10 @@ install(
 
 install(
   FILES
-    "${CMAKE_SOURCE_DIR}/Resources/vistarlogo.png"
-    "${CMAKE_SOURCE_DIR}/Resources/toggle_on.png"
-    "${CMAKE_SOURCE_DIR}/Resources/toggle_off.png"
-    "${CMAKE_SOURCE_DIR}/Resources/login.png"
+    "${CMAKE_SOURCE_DIR}/Resources/images/vistar.ico"
+    "${CMAKE_SOURCE_DIR}/Resources/images/toggle_on.ico"
+    "${CMAKE_SOURCE_DIR}/Resources/images/toggle_off.ico"
+    "${CMAKE_SOURCE_DIR}/Resources/images/login.ico"
     
 
   DESTINATION

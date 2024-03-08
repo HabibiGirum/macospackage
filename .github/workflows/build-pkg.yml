@@ -376,7 +376,8 @@ jobs:
         run: |
           pip3 install pyinstaller
           pip3 install requests
-          pip3 install rumps
+          pip3 install PyQt5
+
 
           pip3 install packaging
       - name: create vistar agent app
@@ -389,7 +390,7 @@ jobs:
       - name: upload artifact
         uses: actions/upload-artifact@v2
         with:
-          name: executable app with py2app
+          name: executable app with pyinstaller
           path: osquery-packaging/Vistar.app
   
   
