@@ -30,7 +30,7 @@ class VistarSyncApp(QMainWindow):
         self.setGeometry(1200, 50, 250, 0)
 
         # Set the application icon
-        self.setWindowIcon(QIcon("/Applications/Vistar.app/Contents/Resources/images/vistar.ico"))
+        self.setWindowIcon(QIcon("/Applications/Vistar.app/Contents/Resources/vistar.ico"))
         # Create a QLabel for the image
         central_widget = QWidget(self)
         self.setCentralWidget(central_widget)
@@ -39,12 +39,12 @@ class VistarSyncApp(QMainWindow):
         layout = QVBoxLayout()
 
         # Load toggle images
-        self.start_image = QPixmap("/Applications/Vistar.app/Contents/Resources/images/toggle_off.ico")
-        self.stop_image = QPixmap("/Applications/Vistar.app/Contents/Resources/images/toggle_on.ico")
+        self.start_image = QPixmap("/Applications/Vistar.app/Contents/Resources/toggle_off.ico")
+        self.stop_image = QPixmap("/Applications/Vistar.app/Contents/Resources/toggle_on.ico")
 
         # Create a QLabel for the image
         image_label = QLabel(self)
-        image_label.setPixmap(QPixmap("/Applications/Vistar.app/Contents/Resources/images/vistar.ico"))  # Replace with your image path
+        image_label.setPixmap(QPixmap("/Applications/Vistar.app/Contents/Resources/vistar.ico"))  # Replace with your image path
         image_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(image_label)
 
@@ -169,7 +169,7 @@ if __name__ == '__main__':
     app.setQuitOnLastWindowClosed(False)
     osquery_app = VistarSyncApp()
 
-    icon = QIcon("/Applications/Vistar.app/Contents/Resources/images/vistar.ico")
+    icon = QIcon("/Applications/Vistar.app/Contents/Resources/vistar.ico")
 
     # Adding item on the menu bar
     tray = QSystemTrayIcon(icon)
