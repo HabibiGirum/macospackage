@@ -21,12 +21,16 @@ class VistarSyncApp(QMainWindow):
         self.interval_seconds = 30
         self.last_sync_time = None
         self.sync_active = False
+        if self.sync_active == False:
+            self.display_mac_addresses()
+        else:
+            pass
+
         self.create_UI()
 
     def create_UI(self):
-        self.setStyleSheet("QMainWindow::title { background-color: black; color: white; border: 20px solid gray; font-size: 20px; }")
-
         self.setWindowTitle("Vistar MDM . . .")
+        self.setStyleSheet("QMainWindow::title { background-color: black; color: white; border: 20px solid gray; font-size: 20px; }")
         self.setGeometry(1200, 50, 250, 0)
 
         # Set the application icon
@@ -83,12 +87,11 @@ class VistarSyncApp(QMainWindow):
         """
         self.toggle_button.setStyleSheet(button_style)
 
-
-
         # exit_button= QPushButton("Exit", self)
         # exit_button.clicked.connect(self.on_exit)
         # exit_button.setGeometry(10,60, 100,32)
         # exit_button.setStyleSheet(button_style)
+        
         self.update_toggle_button_label()
 
         self.sync_timer = QTimer(self)
@@ -159,11 +162,53 @@ class VistarSyncApp(QMainWindow):
         sys.exit()
     def show_window(self):
         if self.isVisible():
-            toggle_app_action.setText("close")
-            self.hide
-        else:
             toggle_app_action.setText("open")
-            self.showNormal() 
+            self.hide()
+        else:
+            toggle_app_action.setText("close")
+            self.showNormal()
+
+    def display_mac_addresses(self):
+        try:
+            local_mac_address = self.get_mac_address()
+
+            if local_mac_address:
+                response= requests.get("http://127.0.0.1:8000/api/v1/computers/get_mac_addresses/")
+                print(response.status_code)
+                if response.status_code == 200:
+                    data_list = response.json()
+
+                    for item in data_list:
+                        server_mac_address = item.get('data')
+                        if server_mac_address and server_mac_address == local_mac_address:
+                            QMessageBox.information(self, "Correct MAC Address", f"Hello We are Vistar\nThank you for Registeration!")
+                            break
+                        else:
+                            QMessageBox.warning(self, "Incorrect MAC Address", "Please Register before \nstart sync data")
+                else:
+                    print(f"erro")
+            else:
+                QMessageBox.warning(self, "Failed to Get MAC Address", "Please check your internet")
+        except requests.exceptions.RequestException as e:
+            print(f"Error: {e}")
+
+    def get_mac_address(self):
+        try:
+            command = [
+                '/Applications/Vistar.app/Contents/MacOS/osqueryi',
+                '--header=false',
+                '--csv',
+                'SELECT REPLACE(CONCAT(hostname, "-", uuid), "-", "_") FROM system_info;'
+            ]
+
+            result = subprocess.run(command, capture_output=True, text=True)
+            mac_address = result.stdout.strip()
+
+            return mac_address
+        except subprocess.CalledProcessError as e:
+            print(f"Failed to get MAC address: {e}")
+            return None
+     
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     app.setQuitOnLastWindowClosed(False)
