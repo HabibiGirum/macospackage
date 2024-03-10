@@ -7,6 +7,7 @@ import subprocess
 import requests
 import json
 
+
 class VistarSyncApp(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -26,7 +27,11 @@ class VistarSyncApp(QMainWindow):
         else:
             pass
 
-        self.create_UI()
+        # self.create_UI()
+    def warning_UI(self):
+        self.setGeometry(1200, 50, 250, 0)
+
+        pass
 
     def create_UI(self):
         self.setWindowTitle("Vistar MDM . . .")
@@ -87,11 +92,13 @@ class VistarSyncApp(QMainWindow):
         """
         self.toggle_button.setStyleSheet(button_style)
 
+
+
         # exit_button= QPushButton("Exit", self)
         # exit_button.clicked.connect(self.on_exit)
         # exit_button.setGeometry(10,60, 100,32)
         # exit_button.setStyleSheet(button_style)
-        
+        # self.display_mac_addresses()
         self.update_toggle_button_label()
 
         self.sync_timer = QTimer(self)
@@ -103,26 +110,35 @@ class VistarSyncApp(QMainWindow):
         self.sync_active = not self.sync_active
 
         if self.sync_active:
-            self.last_sync_time = QDateTime.currentDateTime()
+            # self.last_sync_time = QDateTime.currentDateTime()
             self.sync_data()
         self.update_toggle_button_label()
 
     def sync_data(self):
         current_time = QDateTime.currentDateTime()
-        if self.last_sync_time is None:
+        print(self.last_sync_time)
+        print(self.sync_active)
+        
+        # Check if self.last_sync_time is None and self.sync_active
+        if self.last_sync_time is None and self.sync_active:
+            print("this None")
             self.last_sync_time = current_time
             osquery_data = self.run_osquery_and_send_data()
             self.send_data_to_api(osquery_data)
 
-        elapsed_time = (current_time.toSecsSinceEpoch() - self.last_sync_time.toSecsSinceEpoch())
+        # Check if self.last_sync_time is not None before accessing its attributes
+        if self.last_sync_time is not None:
+            elapsed_time = (current_time.toSecsSinceEpoch() - self.last_sync_time.toSecsSinceEpoch())
 
-        if elapsed_time >= self.interval_seconds and self.sync_active:
-            osquery_data = self.run_osquery_and_send_data()
-            self.send_data_to_api(osquery_data)
-            self.last_sync_time = current_time
+            if elapsed_time >= self.interval_seconds and self.sync_active:
+                print("this is after start")
+                osquery_data = self.run_osquery_and_send_data()
+                self.send_data_to_api(osquery_data)
+                self.last_sync_time = current_time
 
         if self.sync_active:
-            self.sync_timer.start(self.interval_seconds *1000)
+            self.sync_timer.start(self.interval_seconds * 1000)
+
 
     def send_data_to_api(self, data):
         try:
@@ -162,10 +178,10 @@ class VistarSyncApp(QMainWindow):
         sys.exit()
     def show_window(self):
         if self.isVisible():
-            toggle_app_action.setText("open")
+            toggle_app_action.setText("close")
             self.hide()
         else:
-            toggle_app_action.setText("close")
+            toggle_app_action.setText("open")
             self.showNormal()
 
     def display_mac_addresses(self):
@@ -173,25 +189,42 @@ class VistarSyncApp(QMainWindow):
             local_mac_address = self.get_mac_address()
 
             if local_mac_address:
-                response= requests.get("http://127.0.0.1:8000/api/v1/computers/get_mac_addresses/")
+                response = requests.get("http://127.0.0.1:8000/api/v1/computers/get_mac_addresses/")
                 print(response.status_code)
+
                 if response.status_code == 200:
                     data_list = response.json()
+                    mac_address_matched = False
 
                     for item in data_list:
                         server_mac_address = item.get('data')
-                        if server_mac_address and server_mac_address == local_mac_address:
-                            QMessageBox.information(self, "Correct MAC Address", f"Hello We are Vistar\nThank you for Registeration!")
+
+                        # Remove the inner loop
+                        print(server_mac_address)
+                        if server_mac_address == local_mac_address:
+                            mac_address_matched = True
                             break
-                        else:
-                            QMessageBox.warning(self, "Incorrect MAC Address", "Please Register before \nstart sync data")
+
+                    if mac_address_matched:
+                        QMessageBox.information(self, "Correct MAC Address", f"Hello We are Vistar\nThank you for Registration!")
+                        self.create_UI()
+                    elif len(data_list) > 0:
+                        # Display this message only if there are entries in data_list and no match is found
+                        QMessageBox.warning(self, "Incorrect MAC Address", "Your MAC address is not found in the database.")
+                        self.warning_UI()
+                    else:
+                        QMessageBox.warning(self, "Empty MAC Address List", "No MAC addresses found in the database.")
                 else:
-                    print(f"erro")
+                    print(f"Failed to fetch MAC addresses. status code: {response.status_code}")
             else:
                 QMessageBox.warning(self, "Failed to Get MAC Address", "Please check your internet")
         except requests.exceptions.RequestException as e:
-            print(f"Error: {e}")
+            print(f'Error fetching MAC addresses: {e}')
 
+
+
+
+            
     def get_mac_address(self):
         try:
             command = [
@@ -235,7 +268,7 @@ if __name__ == '__main__':
     quit = QAction("Quit")
     quit.triggered.connect(osquery_app.on_exit)
     menu.addAction(quit)
-
+    # display_mac_addresses()
     # Adding options to the system tray
     tray.setContextMenu(menu)
 
