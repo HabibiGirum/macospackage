@@ -1,12 +1,10 @@
 import sys
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
+from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QVBoxLayout, QLabel, QPushButton,QMessageBox,QSystemTrayIcon,QMenu,QAction
+from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtCore import QTimer, QDateTime,Qt
-import PyQt5.QtCore  # Import QtCore separately
 import subprocess
 import requests
 import json
-
 
 class VistarSyncApp(QMainWindow):
     def __init__(self):
@@ -33,17 +31,17 @@ class VistarSyncApp(QMainWindow):
 
         pass
 
+ 
+
     def create_UI(self):
         self.setWindowTitle("Vistar MDM . . .")
         self.setStyleSheet("QMainWindow::title { background-color: black; color: white; border: 20px solid gray; font-size: 20px; }")
-        self.setGeometry(1200, 50, 250, 0)
 
         # Set the application icon
         self.setWindowIcon(QIcon("/Applications/Vistar.app/Contents/Resources/vistar.ico"))
         # Create a QLabel for the image
         central_widget = QWidget(self)
         self.setCentralWidget(central_widget)
-
 
         layout = QVBoxLayout()
 
@@ -61,7 +59,7 @@ class VistarSyncApp(QMainWindow):
         text_label = QLabel("Sync Your Data!", self)
         text_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(text_label)
-        
+
         # Create the toggle button with the start image
         self.toggle_button = QPushButton(self)
         self.toggle_button.setIcon(QIcon(self.start_image))
@@ -72,7 +70,7 @@ class VistarSyncApp(QMainWindow):
 
         # Adding style to the button for better visualization
         button_style = """
-                QPushButton {
+            QPushButton {
                 background-color: #3498db;
                 color: white;
                 border: 1px solid #2980b9;
@@ -92,20 +90,17 @@ class VistarSyncApp(QMainWindow):
         """
         self.toggle_button.setStyleSheet(button_style)
 
-
-
-        # exit_button= QPushButton("Exit", self)
-        # exit_button.clicked.connect(self.on_exit)
-        # exit_button.setGeometry(10,60, 100,32)
-        # exit_button.setStyleSheet(button_style)
-        # self.display_mac_addresses()
         self.update_toggle_button_label()
 
         self.sync_timer = QTimer(self)
         self.sync_timer.timeout.connect(self.sync_data)
-        self.sync_timer.start(self.interval_seconds*1000)
-        # self.isMaximized()==False
-        # self.move()==False
+        self.sync_timer.start(self.interval_seconds * 1000)
+
+        # Adjust the position of the UI to the right corner
+        desktop = QApplication.desktop()
+        screen_rect = desktop.screenGeometry(desktop.primaryScreen())
+        self.move(screen_rect.right() - self.width() - 20, 20)
+        
     def on_toggle(self):
         self.sync_active = not self.sync_active
 
@@ -184,6 +179,8 @@ class VistarSyncApp(QMainWindow):
             toggle_app_action.setText("open")
             self.showNormal()
 
+
+
     def display_mac_addresses(self):
         try:
             local_mac_address = self.get_mac_address()
@@ -206,11 +203,34 @@ class VistarSyncApp(QMainWindow):
                             break
 
                     if mac_address_matched:
-                        QMessageBox.information(self, "Correct MAC Address", f"Hello We are Vistar\nThank you for Registration!")
+                        message_box = QMessageBox()
+                        message_box.setWindowTitle("Vistar MDM . . .")
+                        message_box.setText("Hello We are Vistar Agent\nThank you for Registration!")
+                        message_box.setIcon(QMessageBox.Information)
+                        message_box.addButton(QMessageBox.Ok)
+                        message_box.setDefaultButton(QMessageBox.Ok)
+
+                        # Adjust the position of the message box to the right corner
+                        desktop = QApplication.desktop()
+                        screen_rect = desktop.screenGeometry(desktop.primaryScreen())
+                        message_box.move(screen_rect.right() - message_box.width() - 20, 20)
+
+                        message_box.exec_()
                         self.create_UI()
                     elif len(data_list) > 0:
-                        # Display this message only if there are entries in data_list and no match is found
-                        QMessageBox.warning(self, "Incorrect MAC Address", "Your MAC address is not found in the database.")
+                        message_box = QMessageBox()
+                        message_box.setWindowTitle("Vistar MDM . . .")
+                        message_box.setText("Register before start sync.")
+                        message_box.setIcon(QMessageBox.Warning)
+                        message_box.addButton(QMessageBox.Ok)
+                        message_box.setDefaultButton(QMessageBox.Ok)
+
+                        # Adjust the position of the message box to the right corner
+                        desktop = QApplication.desktop()
+                        screen_rect = desktop.screenGeometry(desktop.primaryScreen())
+                        message_box.move(screen_rect.right() - message_box.width() - 20, 20)
+
+                        message_box.exec_()
                         self.warning_UI()
                     else:
                         QMessageBox.warning(self, "Empty MAC Address List", "No MAC addresses found in the database.")
