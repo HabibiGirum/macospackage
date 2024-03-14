@@ -3,7 +3,7 @@ name: Build pkg file
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
   workflow_dispatch:
 env:
   PACKAGING_REPO: https://github.com/osquery/osquery-packaging
