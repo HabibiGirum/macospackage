@@ -3,7 +3,7 @@ name: Build pkg file
 
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
   workflow_dispatch:
 env:
   PACKAGING_REPO: https://github.com/osquery/osquery-packaging
@@ -425,21 +425,4 @@ jobs:
           name: Vistar 1
           path: package_build/*.pkg
 
-      # - name: Locate the packages
-        # id: packages
-        # shell: bash
-        # run: |
-          # echo "REL_UNSIGNED_RELEASE_PKG_PATH=$(ls package_build/*.pkg)" >> $GITHUB_OUTPUT
-          # echo "REL_UNSIGNED_RELEASE_TGZ_PATH=$(ls package_build/*.tar.gz)" >> $GITHUB_OUTPUT
-
-      # - name: Store the PKG unsigned release packages
-        # uses: actions/upload-artifact@v1
-        # with:
-          # name: macos vistar
-          # path: ${{ steps.packages.outputs.REL_UNSIGNED_RELEASE_PKG_PATH }}
-
-      # - name: Store the TGZ unsigned release packages
-        # uses: actions/upload-artifact@v1
-        # with:
-          # name: macos_unsigned_tgz_universal
-          # path: ${{ steps.packages.outputs.REL_UNSIGNED_RELEASE_TGZ_PATH }}
+      

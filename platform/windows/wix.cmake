@@ -1,4 +1,10 @@
-
+#
+# Copyright (c) 2014-present, The osquery authors
+#
+# This source code is licensed as defined by the LICENSE file found in the
+# root directory of this source tree.
+#
+# SPDX-License-Identifier: (Apache-2.0 OR GPL-2.0-only)
 #
 
 if(OSQUERY_BITNESS STREQUAL "32")
@@ -12,9 +18,7 @@ else()
 endif()
 
 set(CPACK_WIX_PRODUCT_ICON "${OSQUERY_DATA_PATH}/control/osquery.ico")
-set(CPACK_WIX_UI_BANNER "${CMAKE_SOURCE_DIR}/osquery-packaging/banner.bmp")
-set(CPACK_WIX_UI_DIALOG "${CMAKE_SOURCE_DIR}/osquery-packaging/Vistar.bmp")
 set(CPACK_WIX_UPGRADE_GUID "ea6c7327-461e-4033-847c-acdf2b85dede")
-set(CPACK_WIX_PATCH_FILE "${CMAKE_SOURCE_DIR}/osquery-packaging/osquery_wix_patch.xml")
-set(CPACK_PACKAGE_INSTALL_DIRECTORY "vistar")
+set(CPACK_WIX_PATCH_FILE "${OSQUERY_DATA_PATH}/control/msi/osquery_wix_patch.xml")
+set(CPACK_PACKAGE_INSTALL_DIRECTORY "osquery")
 set(CPACK_WIX_EXTENSIONS "WixUtilExtension")
