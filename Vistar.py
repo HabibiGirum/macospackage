@@ -189,7 +189,7 @@ class VistarSyncApp(QMainWindow):
             if local_mac_address:
                 # Send local MAC address to the server
                 data = {"mac_address": local_mac_address}
-                response = requests.post("http://127.0.0.1:8000/api/v1/computers/check_mac_address/", json=data)
+                response = requests.post("https://api.vistar.cloud/api/v1/computers/check_mac_address/", json=data)
                 print(response.status_code)
 
                 if response.status_code == 200:
