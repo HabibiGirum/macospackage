@@ -227,24 +227,24 @@ jobs:
       run: |
         echo "REL_UNSIGNED_RELEASE_PACKAGE_DATA_PATH=$(ls ${{ steps.build_paths.outputs.REL_PACKAGE_BUILD }}/package_data.tar.gz)" >> $GITHUB_OUTPUT
 
-    - name: Store the ${{ matrix.architecture }} unsigned release package data artifact
-      if: matrix.build_type == 'Release'
-      uses: actions/upload-artifact@v1
-      with:
-        name: macos_unsigned_release_package_data_${{ matrix.architecture }}
-        path: ${{ steps.packages.outputs.REL_UNSIGNED_RELEASE_PACKAGE_DATA_PATH }}
+    # - name: Store the ${{ matrix.architecture }} unsigned release package data artifact
+    #   if: matrix.build_type == 'Release'
+    #   uses: actions/upload-artifact@v1
+    #   with:
+    #     name: macos_unsigned_release_package_data_${{ matrix.architecture }}
+    #     path: ${{ steps.packages.outputs.REL_UNSIGNED_RELEASE_PACKAGE_DATA_PATH }}
 
     - name: Package the tests for the x86_64 macOS-11 worker
       if: matrix.architecture == 'x86_64'
       run: |
         ( cd workspace && ${{ steps.build_paths.outputs.SOURCE }}/tools/ci/scripts/macos/package_tests.sh build macos_tests_${{ matrix.build_type }} )
 
-    - name: Store the packaged tests for the x86_64 macOS-11 worker
-      if: matrix.architecture == 'x86_64'
-      uses: actions/upload-artifact@v1
-      with:
-        name: macos_tests_${{ matrix.build_type }}
-        path: workspace/macos_tests_${{ matrix.build_type }}.tar.gz
+    # - name: Store the packaged tests for the x86_64 macOS-11 worker
+    #   if: matrix.architecture == 'x86_64'
+    #   uses: actions/upload-artifact@v1
+    #   with:
+    #     name: macos_tests_${{ matrix.build_type }}
+    #     path: workspace/macos_tests_${{ matrix.build_type }}.tar.gz
 
     # Before we terminate this job, delete the build folder. The cache
     # actions will require the disk space to create the archives.
@@ -335,16 +335,8 @@ jobs:
             "workspace/install" \
             "3.21.4"
 
-      - uses: actions/download-artifact@v2
-        with:
-          name: macos_unsigned_release_package_data_x86_64
-          path: macos_unsigned_release_package_data_x86_64
 
-      - uses: actions/download-artifact@v2
-        with:
-          name: macos_unsigned_release_package_data_arm64
-          path: macos_unsigned_release_package_data_arm64
-
+      
       - name: Create the universal package data
         run: |
           ./osquery/tools/ci/scripts/macos/build_universal_package_data.sh
@@ -387,12 +379,7 @@ jobs:
           ls
           pyinstaller --onefile Vistar.py
           ls
-      - name: upload artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: executable app with pyinstaller
-          path: osquery-packaging/Vistar.app
-  
+    
   
   
 
