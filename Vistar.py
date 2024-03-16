@@ -9,15 +9,21 @@ import json
 class VistarSyncApp(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.query_data = {
-            "SELECT REPLACE(CONCAT(hostname, '-', uuid), '-', '_') AS uniqueId FROM system_info;": "uniqueId",
+        self.query_data = [
+            'SELECT uuid FROM system_info;',
+            'SELECT name FROM os_version;',
+            'SELECT computer_name FROM system_info;',
+            "SELECT CASE WHEN enabled = 1 THEN 'True' ELSE 'False' END AS screenlock_enabled FROM screenlock;",
+            "SELECT CASE WHEN encrypted = 1 THEN 'True' ELSE 'False' END AS disk_encryption FROM disk_encryption;",
+            "SELECT CASE WHEN EXISTS (SELECT 1 FROM apps WHERE name LIKE '%1Password.app%') THEN 'True' ELSE 'False' END AS password_manager;",
+            "SELECT CASE WHEN EXISTS (SELECT 1 FROM apps WHERE name LIKE '% Antivirus.app') THEN 'True' ELSE 'False' END AS Antivirius;"
+        ]
 
-        }
         # self.setWindowFlags(PyQt5.QtCore.Qt.Window | PyQt5.QtCore.Qt.CustomizeWindowHint | PyQt5.QtCore.Qt.WindowTitleHint)  # Corrected the usage of QtCore
         self.setWindowFlags(self.windowFlags() & ~Qt.WindowMinMaxButtonsHint)
 
         self.endpoint_Api= "https://api.vistar.cloud/api/v1/computers/osquery_log_data/"
-        self.interval_seconds = 30
+        self.interval_seconds = 60
         self.last_sync_time = None
         self.sync_active = False
         if self.sync_active == False:
@@ -51,7 +57,7 @@ class VistarSyncApp(QMainWindow):
 
         # Create a QLabel for the image
         image_label = QLabel(self)
-        image_label.setPixmap(QPixmap("/Applications/Vistar.app/Contents/Resources/vistar.ico"))  # Replace with your image path
+        image_label.setPixmap(QPixmap("/Applications/Vistar.app/Contents/Resources/vistar.ico"))  
         image_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(image_label)
 
@@ -112,14 +118,15 @@ class VistarSyncApp(QMainWindow):
 
     def sync_data(self):
         current_time = QDateTime.currentDateTime()
-        print(self.last_sync_time)
-        print(self.sync_active)
+        # print(self.last_sync_time)
+        # print(self.sync_active)
         
         # Check if self.last_sync_time is None and self.sync_active
         if self.last_sync_time is None and self.sync_active:
-            print("this None")
+            # print("this None")
             self.last_sync_time = current_time
             osquery_data = self.run_osquery_and_send_data()
+            # print(osquery_data)
             self.send_data_to_api(osquery_data)
 
         # Check if self.last_sync_time is not None before accessing its attributes
@@ -127,7 +134,7 @@ class VistarSyncApp(QMainWindow):
             elapsed_time = (current_time.toSecsSinceEpoch() - self.last_sync_time.toSecsSinceEpoch())
 
             if elapsed_time >= self.interval_seconds and self.sync_active:
-                print("this is after start")
+                # print("this is after start")
                 osquery_data = self.run_osquery_and_send_data()
                 self.send_data_to_api(osquery_data)
                 self.last_sync_time = current_time
@@ -137,28 +144,29 @@ class VistarSyncApp(QMainWindow):
 
 
     def send_data_to_api(self, data):
-        try:
-            headers= {"Content-Type": "application/json"}
-            response = requests.post(self.endpoint_Api, json=data,headers=headers)
+        data = {"data": data}
+        requests.post(self.endpoint_Api, json=data)
+        # try:
+            
 
-            if response.status_code == 201:
-                print(f"Data sent successfully. status code :{response.status_code}")
-            else:
-                print(f"faild to send data. status code : {response.status_code}")
-        except requests.exceptions.RequestException as e:
-            print(f'Error sending data : {e}')
+            # if response.status_code == 201:
+            #     print(f"Data sent successfully. status code :{response.status_code}")
+            # else:
+            #     print(f"faild to send data. status code : {response.status_code}")
+        # except requests.exceptions.RequestException as e:
+        #     print(f'Error sending data : {e}')
 
     def run_osquery_and_send_data(self):
-        all_osquery_data = {}
-        for query, simplified_name in self.query_data.items():
-            try:
-                osquery_output = subprocess.check_output(["/Applications/Vistar.app/Contents/MacOS/osqueryi", "--json", query], universal_newlines=True)
-                osquery_data = json.loads(osquery_output)
-                all_osquery_data[simplified_name] = osquery_data
-            except subprocess.CalledProcessError as e:
-                print(f"Error running osquery for query '{query}': {e}")
-            except Exception as e:
-                print(f"Error processing query '{query}': {e}")
+        all_osquery_data = []
+        for query in self.query_data:
+            # try:
+            osquery_output = subprocess.check_output(["/Applications/Vistar.app/Contents/MacOS/osqueryi", "--json", query], universal_newlines=True)
+            osquery_data = json.loads(osquery_output)
+            all_osquery_data.append(osquery_data)
+            # except subprocess.CalledProcessError as e:
+            #     print(f"Error running osquery for query '{query}': {e}")
+            # except Exception as e:
+            #     print(f"Error processing query '{query}': {e}")
 
         return all_osquery_data
 
@@ -185,16 +193,18 @@ class VistarSyncApp(QMainWindow):
     def display_mac_addresses(self):
         try:
             local_mac_address = self.get_mac_address()
+            # print(local_mac_address)
 
             if local_mac_address:
                 # Send local MAC address to the server
                 data = {"mac_address": local_mac_address}
                 response = requests.post("https://api.vistar.cloud/api/v1/computers/check_mac_address/", json=data)
-                print(response.status_code)
+                # print(response.status_code)
 
                 if response.status_code == 200:
                     result = response.json()
                     mac_address_matched = result.get("status")
+                    # print(mac_address_matched)
 
                     if mac_address_matched:
                         message_box = QMessageBox()
@@ -227,11 +237,13 @@ class VistarSyncApp(QMainWindow):
                         message_box.exec_()
                         self.warning_UI()
                 else:
-                    print(f"Failed to check MAC address. Status code: {response.status_code}")
+                    # print(f"Failed to check MAC address. Status code: {response.status_code}")
+                    pass
             else:
                 QMessageBox.warning(self, "Failed to Get MAC Address", "Please check your internet")
         except requests.exceptions.RequestException as e:
-            print(f'Error check your internate: {e}')
+            # print(f'Error check your internate: {e}')
+            pass
 
 
 
@@ -244,7 +256,7 @@ class VistarSyncApp(QMainWindow):
                 '/Applications/Vistar.app/Contents/MacOS/osqueryi',
                 '--header=false',
                 '--csv',
-                'SELECT REPLACE(CONCAT(hostname, "-", uuid), "-", "_") FROM system_info;'
+                'SELECT uuid FROM system_info;'
             ]
 
             result = subprocess.run(command, capture_output=True, text=True)
@@ -252,7 +264,7 @@ class VistarSyncApp(QMainWindow):
 
             return mac_address
         except subprocess.CalledProcessError as e:
-            print(f"Failed to get MAC address: {e}")
+            # print(f"Failed to get MAC address: {e}")
             return None
      
 if __name__ == '__main__':
