@@ -13,10 +13,11 @@ class VistarSyncApp(QMainWindow):
             'SELECT uuid FROM system_info;',
             'SELECT name FROM os_version;',
             'SELECT computer_name FROM system_info;',
-            "SELECT CASE WHEN enabled = 1 THEN 'True' ELSE 'False' END AS screenlock_enabled FROM screenlock;",
-            "SELECT CASE WHEN encrypted = 1 THEN 'True' ELSE 'False' END AS disk_encryption FROM disk_encryption;",
-            "SELECT CASE WHEN EXISTS (SELECT 1 FROM apps WHERE name LIKE '%1Password.app%') THEN 'True' ELSE 'False' END AS password_manager;",
-            "SELECT CASE WHEN EXISTS (SELECT 1 FROM apps WHERE name LIKE '% Antivirus.app') THEN 'True' ELSE 'False' END AS Antivirius;"
+            "SELECT CASE WHEN enabled = 1 THEN 'Yes' ELSE 'No' END AS screenlock_enabled FROM screenlock;",
+            "SELECT CASE WHEN enabled = 1 THEN 'Yes' ELSE 'No' END AS screenlock_enabled FROM screenlock;",
+            "SELECT CASE WHEN encrypted = 1 THEN 'Yes' ELSE 'No' END AS disk_encryption FROM disk_encryption;",
+            "SELECT CASE WHEN EXISTS (SELECT 1 FROM apps WHERE name LIKE '%1Password.app%') THEN 'Yes' ELSE 'No' END AS password_manager;",
+            "SELECT CASE WHEN EXISTS (SELECT 1 FROM apps WHERE name LIKE '% Antivirus.app') THEN 'Yes' ELSE 'No' END AS Antivirius;"
         ]
 
         # self.setWindowFlags(PyQt5.QtCore.Qt.Window | PyQt5.QtCore.Qt.CustomizeWindowHint | PyQt5.QtCore.Qt.WindowTitleHint)  # Corrected the usage of QtCore
