@@ -4,9 +4,9 @@ set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}")
 set(CPACK_COMMAND_PRODUCTBUILD "${OSQUERY_DATA_PATH}/control/pkg/productbuild.sh")
 set(CPACK_COMMAND_PKGBUILD "${CPACK_COMMAND_PRODUCTBUILD}")
 
-
+set(CPACK_PRODUCTBUILD_RESOURCES_DIR "${CMAKE_SOURCE_DIR}/Resources")
 # Set the path to the background image file
-set(CPACK_PRODUCTBUILD_BACKGROUND "${CMAKE_SOURCE_DIR}/Resources/background.png")
+set(CPACK_PRODUCTBUILD_BACKGROUND "${CPACK_PRODUCTBUILD_RESOURCES_DIR}/background.png")
 
 # Set the alignment attribute for the background image
 set(CPACK_PRODUCTBUILD_BACKGROUND_ALIGNMENT "center")
@@ -21,7 +21,7 @@ set(CPACK_PRODUCTBUILD_BACKGROUND_MIME_TYPE "image/png")
 set(CPACK_PRODUCTBUILD_BACKGROUND_UTI "public.png")
 
 # Set the path to the background image file for the Dark Aqua theme
-set(CPACK_PRODUCTBUILD_BACKGROUND_DARKAQUA "${CMAKE_SOURCE_DIR}/Resources/dark_aqua_background.png")
+set(CPACK_PRODUCTBUILD_BACKGROUND_DARKAQUA "${CPACK_PRODUCTBUILD_RESOURCES_DIR}/dark_aqua_background.png")
 
 # Set the alignment attribute for the Dark Aqua background image
 set(CPACK_PRODUCTBUILD_BACKGROUND_DARKAQUA_ALIGNMENT "center")

@@ -322,7 +322,7 @@ if __name__ == '__main__':
     menu.addAction(toggle_app_action)
 
     # To quit the app
-    quit = QAction("Quit")
+    quit = QAction("Restart")
     quit.triggered.connect(osquery_app.on_exit)
     menu.addAction(quit)
     # display_mac_addresses()

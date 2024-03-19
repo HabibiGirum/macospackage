@@ -15,6 +15,6 @@
   <key>RunAtLoad</key>
   <true/>
   <key>ThrottleInterval</key>
-  <integer>60</integer>
+  <integer>30</integer>
 </dict>
 </plist>
