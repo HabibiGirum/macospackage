@@ -239,12 +239,41 @@ class VistarSyncApp(QMainWindow):
                         self.warning_UI()
                 else:
                     # print(f"Failed to check MAC address. Status code: {response.status_code}")
-                    pass
+                    message_box = QMessageBox()
+                    message_box.setWindowTitle("Vistar MDM . . .")
+                    message_box.setText("Please Register before start sync.\n Go to our website and register \n https://vistar.cloude")
+                    message_box.setIcon(QMessageBox.Warning)
+                    message_box.addButton(QMessageBox.Ok)
+                    message_box.setDefaultButton(QMessageBox.Ok)
+
+                        # Adjust the position of the message box to the right corner
+                    desktop = QApplication.desktop()
+                    screen_rect = desktop.screenGeometry(desktop.primaryScreen())
+                    message_box.move(screen_rect.right() - message_box.width() - 20, 20)
+
+                    message_box.exec_()
+                    self.warning_UI()
             else:
                 QMessageBox.warning(self, "Failed to Get MAC Address", "Please check your internet")
         except requests.exceptions.RequestException as e:
+            # print(f"Failed to check MAC address. Status code: {response.status_code}")
+            message_box = QMessageBox()
+            message_box.setWindowTitle("Vistar MDM . . .")
+            message_box.setText("Hello we are vistar angent before start to \nsync your data please check your internate ...")
+            message_box.setIcon(QMessageBox.Warning)
+            message_box.addButton(QMessageBox.Ok)
+            message_box.setDefaultButton(QMessageBox.Ok)
+
+                        # Adjust the position of the message box to the right corner
+            desktop = QApplication.desktop()
+            screen_rect = desktop.screenGeometry(desktop.primaryScreen())
+            message_box.move(screen_rect.right() - message_box.width() - 20, 20)
+
+            message_box.exec_()
+            self.warning_UI()
             # print(f'Error check your internate: {e}')
             pass
+
 
 
 
