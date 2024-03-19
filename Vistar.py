@@ -212,6 +212,8 @@ class VistarSyncApp(QMainWindow):
                         message_box.setWindowTitle("Vistar MDM . . .")
                         message_box.setText("Hello We are Vistar Agent\nThank you for Registration!")
                         message_box.setIcon(QMessageBox.Information)
+                        # message_box.setIcon("/Applications/Vistar.app/Contents/Resources/vistar.ico")
+                        message_box.setIconPixmap(QPixmap("/Applications/Vistar.app/Contents/Resources/vistar.ico"))
                         message_box.addButton(QMessageBox.Ok)
                         message_box.setDefaultButton(QMessageBox.Ok)
 
