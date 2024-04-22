@@ -400,10 +400,9 @@ jobs:
     - name: checkout repostiroy 
       uses: actions/checkout@v2
     - name: set up python
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v2
       with:
-        python-version: '3.12.2'
-        architecture: 'x64'
+        python-version: '3.x'
     - name: Install dependencies
       run: |
         pip install pyinstaller
