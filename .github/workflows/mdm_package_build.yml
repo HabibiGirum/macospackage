@@ -402,7 +402,7 @@ jobs:
     - name: set up python
       uses: actions/setup-python@v2
       with:
-        python-version: '3.x'
+        python-version: '3.'
     - name: Install dependencies
       run: |
         pip install pyinstaller
@@ -411,8 +411,7 @@ jobs:
 
     - name: Build executable
       run: |
-        pyinstaller --onefile platform/linux/vistar.py
-        ls
+        pyinstaller --onefile platform/linux/vistar.py 
     - name: Upload Artifact
       uses: actions/upload-artifact@v2
       with:
@@ -537,7 +536,7 @@ jobs:
       if: matrix.build_type == 'RelWithDebInfo'
       uses: actions/download-artifact@v2
       with:
-        name: vistar-executable-x86_64
+        name: vistar-executable-arm64
         path: ${{ steps.build_paths.outputs.PACKAGING }}/ 
     
     - name: paths
