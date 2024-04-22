@@ -400,9 +400,9 @@ jobs:
     - name: checkout repostiroy 
       uses: actions/checkout@v2
     - name: set up python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v5
       with:
-        python-version: '3.x'
+        python-version: '3.12.2'
         architecture: ${{ matrix.architecture }}
     - name: Install dependencies
       run: |
