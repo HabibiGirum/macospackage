@@ -10,25 +10,25 @@
 install(
   DIRECTORY "${OSQUERY_DATA_PATH}/control/nupkg/tools"
   DESTINATION "."
-  COMPONENT vistar
+  COMPONENT osquery
 )
 
 install(
   FILES "${OSQUERY_DATA_PATH}/control/nupkg/extras/VERIFICATION.txt"
   DESTINATION "."
-  COMPONENT vistar
+  COMPONENT osquery
 )
 
 install(
   FILES "${OSQUERY_DATA_PATH}/control/osquery.png"
   DESTINATION "."
-  COMPONENT vistar
+  COMPONENT osquery
 )
 
 install(
   FILES "${OSQUERY_DATA_PATH}/control/LICENSE.txt"
   DESTINATION "."
-  COMPONENT vistar
+  COMPONENT osquery
 )
 
 set(CPACK_NUGET_PACKAGE_DESCRIPTION "

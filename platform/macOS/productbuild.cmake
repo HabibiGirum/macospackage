@@ -8,7 +8,7 @@ set(CPACK_COMMAND_PKGBUILD "${CPACK_COMMAND_PRODUCTBUILD}")
 
 install(
   FILES
-    "${CMAKE_SOURCE_DIR}/Resources/Info.plist"
+    "${CMAKE_SOURCE_DIR}/Resources/macos/Info.plist"
     
 
   DESTINATION
@@ -20,7 +20,7 @@ install(
 
 install(
   FILES
-    "${CMAKE_SOURCE_DIR}/Resources/io.vistar.agent.plist"
+    "${CMAKE_SOURCE_DIR}/Resources/macos/io.vistar.agent.plist"
 
   DESTINATION
     "/Library/LaunchDaemons/"

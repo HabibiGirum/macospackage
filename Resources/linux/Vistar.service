@@ -1,0 +1,11 @@
+[Unit]
+Description=Vistar Service
+After=network.target
+
+[Service]
+Environment="QT_QPA_PLATFORM=wayland"
+ExecStart=env QT_QPA_PLATFORM=wayland /opt/osquery/bin/vistar
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
