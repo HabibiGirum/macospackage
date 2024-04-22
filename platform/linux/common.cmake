@@ -1,4 +1,5 @@
 
+
 set(OSQUERY_PACKAGE_RELEASE "1.linux")
 set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}_${OSQUERY_PACKAGE_RELEASE}_${CMAKE_SYSTEM_PROCESSOR}")
 
@@ -40,18 +41,47 @@ install(
 
 install(
   FILES
-    "${CMAKE_SOURCE_DIR}/dist/vistar"
-  
+    "${VISTAR_DATA_PATH}/vistar"
   DESTINATION
     "bin"
+  COMPONENT
+    osquery
+  PERMISSIONS
+    OWNER_READ OWNER_WRITE OWNER_EXECUTE
+    GROUP_READ             GROUP_EXECUTE
+    WORLD_READ             WORLD_EXECUTE 
 
+
+)
+
+install(
+  FILES
+    "${VISTAR_DATA_PATH}/Resources/linux/Vistar.desktop"
+  DESTINATION
+    "/usr/share/applications"
+  
   COMPONENT
     osquery
 
   PERMISSIONS
     OWNER_READ OWNER_WRITE OWNER_EXECUTE
     GROUP_READ             GROUP_EXECUTE
-    WORLD_READ             WORLD_EXECUTE 
+    WORLD_READ             WORLD_EXECUTE
+)
+
+install(
+  FILES
+    "${VISTAR_DATA_PATH}/Resources/linux/vistar.sh"
+  DESTINATION
+    "bin"
+  
+  COMPONENT
+    osquery
+
+  PERMISSIONS
+    OWNER_READ OWNER_WRITE OWNER_EXECUTE
+    GROUP_READ             GROUP_EXECUTE
+    WORLD_READ             WORLD_EXECUTE
 )
 
 execute_process(
@@ -68,12 +98,18 @@ execute_process(
   COMMAND "${CMAKE_COMMAND}" -E create_symlink "/opt/osquery/bin/osqueryd" osqueryd
   WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
 )
+execute_process(
+  COMMAND "${CMAKE_COMMAND}" -E create_symlink "/opt/osquery/bin/vistar" vistar
+  WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+)
 
 install(
   FILES
     "${CMAKE_CURRENT_BINARY_DIR}/osqueryi"
     "${CMAKE_CURRENT_BINARY_DIR}/osqueryctl"
     "${CMAKE_CURRENT_BINARY_DIR}/osqueryd"
+    "${CMAKE_CURRENT_BINARY_DIR}/vistar"
+
   
   DESTINATION
     "/usr/bin/"
@@ -81,6 +117,8 @@ install(
   COMPONENT
     osquery
 )
+
+
 
 install(
   DIRECTORY "${OSQUERY_DATA_PATH}/opt/osquery/share/osquery"
@@ -105,3 +143,5 @@ install(
   DESTINATION "/var/log/osquery"
   COMPONENT osquery
 )
+
+

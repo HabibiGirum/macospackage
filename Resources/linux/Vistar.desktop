@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Version=1.0.0
+Name=Vistar
+Comment=Vistar MDM Application
+Path=/opt/osquery/bin
+Exec=env QT_QPA_PLATFORM=wayland /opt/osquery/bin/vistar
+Icon=vistar

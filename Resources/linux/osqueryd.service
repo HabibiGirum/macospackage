@@ -1,0 +1,7 @@
+[Unit]
+Description=Vistar MDM
+After=network.service syslog.service
+
+[Service]
+TimeoutStartSec=0
+EnvironmentFile=/etc/profile
