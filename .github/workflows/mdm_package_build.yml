@@ -411,7 +411,8 @@ jobs:
 
     - name: Build executable
       run: |
-        pyinstaller --onefile platform/linux/vistar.py 
+        pyinstaller --onefile platform/linux/vistar.py
+        ls
     - name: Upload Artifact
       uses: actions/upload-artifact@v2
       with:
@@ -536,7 +537,7 @@ jobs:
       if: matrix.build_type == 'RelWithDebInfo'
       uses: actions/download-artifact@v2
       with:
-        name: vistar-executable-amd64
+        name: vistar-executable-x86_64
         path: ${{ steps.build_paths.outputs.PACKAGING }}/ 
     
     - name: paths
