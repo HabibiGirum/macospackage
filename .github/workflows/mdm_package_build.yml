@@ -260,8 +260,14 @@ jobs:
       - uses: actions/download-artifact@v2
         with:
           name: macos_tests_Debug
+      - name: setup pyhon
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12.2'
+          architecture: 'x64'
 
       - name: Install tests dependencies
+        id: install_test_deps
         run: |
           python_root="/usr/local/Frameworks/Python.framework/Versions/Current"
           ${python_root}/bin/pip3 install setuptools \
@@ -290,6 +296,8 @@ jobs:
       - name: Run the Release tests
         run: |
           ( cd macos_tests_Release && ./run.sh )
+
+
   # This job builds the universal macOS artifacts
   build_universal_macos_artifacts:
     needs: test_macos_bigsur
@@ -342,9 +350,10 @@ jobs:
           path: osquery-packaging
 
       - name: set up python 
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
-          python-version: 3.12
+          python-version: '3.12.2'
+          architecture: 'x64'
 
       - name: install dependencies
         run: |
