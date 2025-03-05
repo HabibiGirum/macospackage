@@ -220,7 +220,7 @@ jobs:
         echo "REL_UNSIGNED_RELEASE_PACKAGE_DATA_PATH=$(ls ${{ steps.build_paths.outputs.REL_PACKAGE_BUILD }}/package_data.tar.gz)" >> $GITHUB_OUTPUT
     - name: Store the ${{ matrix.architecture }} unsigned release package data artifact
       if: matrix.build_type == 'Release'
-      uses: actions/upload-artifact@v1
+      uses: actions/upload-artifact@v2
       with:
         name: macos_unsigned_release_package_data_${{ matrix.architecture }}
         path: ${{ steps.packages.outputs.REL_UNSIGNED_RELEASE_PACKAGE_DATA_PATH }}
@@ -231,7 +231,8 @@ jobs:
         ( cd workspace && ${{ steps.build_paths.outputs.SOURCE }}/tools/ci/scripts/macos/package_tests.sh build macos_tests_${{ matrix.build_type }} )
     - name: Store the packaged tests for the x86_64 macOS-11 worker
       if: matrix.architecture == 'x86_64'
-      uses: actions/upload-artifact@v1
+      
+      uses: actions/upload-artifact@v2
       with:
         name: macos_tests_${{ matrix.build_type }}
         path: workspace/macos_tests_${{ matrix.build_type }}.tar.gz
@@ -332,7 +333,7 @@ jobs:
           ./osquery/tools/ci/scripts/macos/build_universal_package_data.sh
           
       - name: Store the universal unsigned release package data artifact
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v2
         with:
           name: macos_unsigned_release_package_data_universal
           path: package_data.tar.gz
@@ -681,7 +682,7 @@ jobs:
 
     - name: Store the unsigned release DEB artifact
       if: matrix.build_type == 'RelWithDebInfo'
-      uses: actions/upload-artifact@v1
+      uses: actions/upload-artifact@v2
       with:
         name: linux_unsigned_release_deb
         path: ${{ steps.packages.outputs.REL_UNSIGNED_RELEASE_DEB_PATH }}
@@ -1124,21 +1125,21 @@ jobs:
         echo "REL_UNSIGNED_RELEASE_NUPKG_PATH=$(ls *.nupkg)" >> $GITHUB_OUTPUT
     
     - name: Store the unsigned release package data artifact
-      uses: actions/upload-artifact@v1
+      uses: actions/upload-artifact@v2
       with:
         name: windows${{ matrix.bitness }}_unsigned_release_package_data
         path: ${{ steps.packages.outputs.REL_UNSIGNED_RELEASE_PACKAGE_DATA_PATH }}
     
     - name: Store the unsigned release MSI artifact
       if: matrix.bitness != 'arm64'
-      uses: actions/upload-artifact@v1
+      uses: actions/upload-artifact@v2
       with:
         name: windows${{ matrix.bitness }}_unsigned_release_msi
         path: ${{ steps.packages.outputs.REL_UNSIGNED_RELEASE_MSI_PATH }}
     
     - name: Store the unsigned release NUPKG artifact
       if: matrix.bitness != 'arm64'
-      uses: actions/upload-artifact@v1
+      uses: actions/upload-artifact@v2
       with:
         name: windows${{ matrix.bitness }}_unsigned_release_nupkg
         path: ${{ steps.packages.outputs.REL_UNSIGNED_RELEASE_NUPKG_PATH }}
