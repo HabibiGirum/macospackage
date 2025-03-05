@@ -72,7 +72,7 @@ jobs:
           cmake --build . --target package
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: osquery-macos-${{ matrix.architecture }}-${{ matrix.build_type }}
           path: workspace/build/*.pkg
@@ -125,7 +125,7 @@ jobs:
           cmake --build . --target package
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: osquery-linux-${{ matrix.build_type }}
           path: workspace/build/*.deb
@@ -179,7 +179,7 @@ jobs:
           cmake --build . --target package
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: osquery-windows-${{ matrix.bitness }}-${{ matrix.build_type }}
           path: workspace/build/*.msi
