@@ -1,0 +1,373 @@
+
+name: Build pkg file
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+env:
+  PACKAGING_REPO: https://github.com/osquery/osquery-packaging
+  PACKAGING_COMMIT: 4caa2c54f0d893c1efa47932571046bbce156c52
+  SUBMODULE_CACHE_VERSION: 2
+jobs:
+  build_macos:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        build_type: [Release, Debug]
+        architecture: [x86_64, arm64]
+        os: [macos-12]
+
+        exclude:
+          - build_type: Debug
+            architecture: arm64
+
+    steps:
+    - name: Select the build job count
+      shell: bash
+      id: build_job_count
+      run: |
+        echo "VALUE=$(($(sysctl -n hw.logicalcpu) + 1))" >> $GITHUB_OUTPUT
+    - name: Setup the build paths
+      shell: bash
+      id: build_paths
+      run: |
+        rel_build_path="workspace/build"
+        rel_src_path="workspace/src"
+        rel_ccache_path="workspace/ccache"
+        rel_downloads_path="workspace/downloads"
+        rel_install_path="workspace/install"
+        rel_package_data_path="workspace/package_data"
+        rel_packaging_path="workspace/osquery-packaging"
+        rel_package_build_path="workspace/package-build"
+        mkdir -p ${rel_build_path} \
+                 ${rel_ccache_path} \
+                 ${rel_downloads_path} \
+                 ${rel_install_path} \
+                 ${rel_package_data_path} \
+                 ${rel_package_build_path}
+        echo "SOURCE=$(pwd)/${rel_src_path}" >> $GITHUB_OUTPUT
+        echo "REL_SOURCE=${rel_src_path}" >> $GITHUB_OUTPUT
+        echo "BINARY=$(pwd)/${rel_build_path}" >> $GITHUB_OUTPUT
+        echo "CCACHE=$(pwd)/${rel_ccache_path}" >> $GITHUB_OUTPUT
+        echo "DOWNLOADS=$(pwd)/${rel_downloads_path}" >> $GITHUB_OUTPUT
+        echo "INSTALL=$(pwd)/${rel_install_path}" >> $GITHUB_OUTPUT
+        echo "PACKAGING=$(pwd)/${rel_packaging_path}" >> $GITHUB_OUTPUT
+        echo "PACKAGE_DATA=$(pwd)/${rel_package_data_path}" >> $GITHUB_OUTPUT
+        echo "REL_PACKAGE_BUILD=${rel_package_build_path}" >> $GITHUB_OUTPUT
+        echo "PACKAGE_BUILD=$(pwd)/${rel_package_build_path}" >> $GITHUB_OUTPUT
+    # - name: Clone the osquery repository
+      # uses: actions/checkout@v2
+      # with:
+        # fetch-depth: 0
+        # path: ${{ steps.build_paths.outputs.REL_SOURCE }}
+    # - name: Clone the osquery repository
+      # run: git clone https://github.com/osquery/osquery.git ${{ steps.build_paths.outputs.REL_SOURCE }}
+    - name: Clone the osquery repository
+      run: git clone https://github.com/osquery/osquery.git ${{ steps.build_paths.outputs.REL_SOURCE }}
+    
+
+    - name: Update the cache (ccache)
+      uses: actions/cache@v3
+      with:
+        path: ${{ steps.build_paths.outputs.CCACHE }}
+
+        key: |
+          ccache_${{ matrix.os }}_${{ matrix.architecture }}_${{ matrix.build_type }}_${{ github.sha }}
+        restore-keys: |
+          ccache_${{ matrix.os }}_${{ matrix.architecture }}_${{ matrix.build_type }}
+    - name: Update the cache (git submodules)
+      uses: actions/cache@v3
+      with:
+        path: ${{ steps.build_paths.outputs.SOURCE }}/.git/modules
+
+        key: |
+          gitmodules_${{ matrix.os }}_${{ matrix.architecture }}_${{env.SUBMODULE_CACHE_VERSION}}_${{ github.sha }}
+        restore-keys: |
+          gitmodules_${{ matrix.os }}_${{ matrix.architecture }}_${{env.SUBMODULE_CACHE_VERSION}}
+    - name: Update the cache (downloads)
+      uses: actions/cache@v3
+      with:
+        path: ${{ steps.build_paths.outputs.DOWNLOADS }}
+
+        key: |
+          downloads_${{ matrix.os }}_${{ matrix.architecture }}_${{ github.sha }}
+        restore-keys: |
+          downloads_${{ matrix.os }}_${{ matrix.architecture }}
+    - name: Update the git submodules
+      working-directory: ${{ steps.build_paths.outputs.SOURCE }}
+      run: |
+        git submodule sync --recursive
+    - name: Install build dependencies
+      run: |
+        brew install \
+          ccache \
+          flex \
+          bison \
+          coreutils \
+          gnu-sed
+    - name: Install tests dependencies
+      id: install_test_deps
+      run: |
+        python_root="/usr/local/Frameworks/Python.framework/Versions/Current"
+        ${python_root}/bin/pip3 install setuptools \
+                     pexpect==3.3 \
+                     psutil \
+                     timeout_decorator \
+                     six \
+                     thrift==0.11.0 \
+                     osquery
+        echo "PYTHON_ROOT=${python_root}" >> $GITHUB_OUTPUT
+    - name: Install CMake
+      shell: bash
+      run: |
+        ${{ steps.build_paths.outputs.REL_SOURCE }}/tools/ci/scripts/macos/install_cmake.sh \
+          "${{ steps.build_paths.outputs.DOWNLOADS }}" \
+          "${{ steps.build_paths.outputs.INSTALL }}" \
+          "3.21.4"
+    - name: Select the Xcode version
+      shell: bash
+      id: xcode_selector
+      run: |
+        xcode_path="/Applications/Xcode_14.1.app/Contents/Developer"
+        echo "PATH=${path}" >> $GITHUB_OUTPUT
+        sudo xcode-select -s "${xcode_path}"
+        echo "DEPLOYMENT_TARGET=10.15" >> $GITHUB_OUTPUT
+    # We don't have enough space on the worker to actually generate all
+    # the debug symbols (osquery + dependencies), so we have a flag to
+    # disable them when running a Debug build
+    - name: Select the debug symbols options
+      shell: bash
+      id: debug_symbols_settings
+      run: |
+        if [[ "${{ matrix.build_type }}" == "Debug" ]] ; then
+          echo "VALUE=ON" >> $GITHUB_OUTPUT
+        else
+          echo "VALUE=OFF" >> $GITHUB_OUTPUT
+        fi
+    - name: Configure the project
+      shell: bash
+      working-directory: ${{ steps.build_paths.outputs.BINARY }}
+
+      env:
+        CCACHE_DIR: ${{ steps.build_paths.outputs.CCACHE }}
+
+      run: |
+        cmake -G "Unix Makefiles" \
+          -DCMAKE_C_COMPILER=clang \
+          -DCMAKE_CXX_COMPILER=clang++ \
+          -DCMAKE_OSX_ARCHITECTURES="${{ matrix.architecture }}" \
+          -DCMAKE_OSX_DEPLOYMENT_TARGET="${{ steps.xcode_selector.outputs.DEPLOYMENT_TARGET }}" \
+          -DCMAKE_BUILD_TYPE:STRING="${{ matrix.build_type }}" \
+          -DOSQUERY_BUILD_TESTS=ON \
+          -DOSQUERY_NO_DEBUG_SYMBOLS=${{ steps.debug_symbols_settings.outputs.VALUE }} \
+          -DPython3_ROOT_DIR=${{ steps.install_test_deps.outputs.PYTHON_ROOT }} \
+          ${{ steps.build_paths.outputs.SOURCE }}
+    - name: Build the project
+      working-directory: ${{ steps.build_paths.outputs.BINARY }}
+
+      env:
+        CCACHE_DIR: ${{ steps.build_paths.outputs.CCACHE }}
+
+      run: |
+        cmake --build . -j ${{ steps.build_job_count.outputs.VALUE }}
+    - name: Run the tests
+      if: matrix.architecture == 'x86_64'
+      working-directory: ${{ steps.build_paths.outputs.BINARY }}
+      run: |
+        ctest --build-nocmake -V
+    - name: Run the install target
+      working-directory: ${{ steps.build_paths.outputs.BINARY }}
+
+      env:
+        CCACHE_DIR: ${{ steps.build_paths.outputs.CCACHE }}
+        DESTDIR: ${{ steps.build_paths.outputs.PACKAGE_DATA }}
+
+      run: |
+        cmake \
+          --build . \
+          --target install \
+          -j ${{ steps.build_job_count.outputs.VALUE }}
+    - name: Create the package data
+      working-directory: ${{ steps.build_paths.outputs.PACKAGE_BUILD }}
+      run: |
+        tar pcvzf package_data.tar.gz \
+          -C ${{ steps.build_paths.outputs.PACKAGE_DATA }} \
+          .
+    - name: Locate the package data
+      if: matrix.build_type == 'Release'
+      id: packages
+      shell: bash
+      run: |
+        echo "REL_UNSIGNED_RELEASE_PACKAGE_DATA_PATH=$(ls ${{ steps.build_paths.outputs.REL_PACKAGE_BUILD }}/package_data.tar.gz)" >> $GITHUB_OUTPUT
+    - name: Store the ${{ matrix.architecture }} unsigned release package data artifact
+      if: matrix.build_type == 'Release'
+      uses: actions/upload-artifact@v1
+      with:
+        name: macos_unsigned_release_package_data_${{ matrix.architecture }}
+        path: ${{ steps.packages.outputs.REL_UNSIGNED_RELEASE_PACKAGE_DATA_PATH }}
+
+    - name: Package the tests for the x86_64 macOS-11 worker
+      if: matrix.architecture == 'x86_64'
+      run: |
+        ( cd workspace && ${{ steps.build_paths.outputs.SOURCE }}/tools/ci/scripts/macos/package_tests.sh build macos_tests_${{ matrix.build_type }} )
+    - name: Store the packaged tests for the x86_64 macOS-11 worker
+      if: matrix.architecture == 'x86_64'
+      uses: actions/upload-artifact@v1
+      with:
+        name: macos_tests_${{ matrix.build_type }}
+        path: workspace/macos_tests_${{ matrix.build_type }}.tar.gz
+
+    # Before we terminate this job, delete the build folder. The cache
+    # actions will require the disk space to create the archives.
+    - name: Reclaim disk space
+      run: |
+        rm -rf ${{ steps.build_paths.outputs.BINARY }}
+  # This job takes the packaged tests (Release + Debug) from the Monterey
+  # builder and runs them on a new Big Sur instance
+  test_macos_bigsur:
+
+    needs: build_macos
+
+    runs-on: macos-11
+
+    steps:
+      - name: Clone the osquery repository
+        run: git clone --depth 1 https://github.com/osquery/osquery.git
+
+      - uses: actions/download-artifact@v2
+        with:
+          name: macos_tests_Release
+
+      - uses: actions/download-artifact@v2
+        with:
+          name: macos_tests_Debug
+
+      - name: Install tests dependencies
+        run: |
+          python_root="/usr/local/Frameworks/Python.framework/Versions/Current"
+          ${python_root}/bin/pip3 install setuptools \
+                       pexpect==3.3 \
+                       psutil \
+                       timeout_decorator \
+                       six \
+                       thrift==0.11.0 \
+                       osquery
+      - name: Install CMake
+        shell: bash
+        run: |
+          mkdir -p "workspace/downloads" \
+                   "workspace/install"
+          ./osquery/tools/ci/scripts/macos/install_cmake.sh \
+            "workspace/downloads" \
+            "workspace/install" \
+            "3.21.4"
+      - name: Extract the tests
+        run: |
+          tar xzf macos_tests_Release.tar.gz
+          tar xzf macos_tests_Debug.tar.gz
+      - name: Run the Debug tests
+        run: |
+          ( cd macos_tests_Debug && ./run.sh )
+      - name: Run the Release tests
+        run: |
+          ( cd macos_tests_Release && ./run.sh )
+  # This job builds the universal macOS artifacts
+  build_universal_macos_artifacts:
+    needs: test_macos_bigsur
+
+    runs-on: macos-12
+
+    steps:
+      - name: Clone the osquery repository
+        run: git clone --depth 1 https://github.com/osquery/osquery.git
+
+      - name: Install CMake
+        shell: bash
+        run: |
+          mkdir -p "workspace/downloads" \
+                   "workspace/install"
+          ./osquery/tools/ci/scripts/macos/install_cmake.sh \
+            "workspace/downloads" \
+            "workspace/install" \
+            "3.21.4"
+      - uses: actions/download-artifact@v2
+        with:
+          name: macos_unsigned_release_package_data_x86_64
+          path: macos_unsigned_release_package_data_x86_64
+
+      - uses: actions/download-artifact@v2
+        with:
+          name: macos_unsigned_release_package_data_arm64
+          path: macos_unsigned_release_package_data_arm64
+
+      - name: Create the universal package data
+        run: |
+          ./osquery/tools/ci/scripts/macos/build_universal_package_data.sh
+          
+      - name: Store the universal unsigned release package data artifact
+        uses: actions/upload-artifact@v1
+        with:
+          name: macos_unsigned_release_package_data_universal
+          path: package_data.tar.gz
+
+     # - name: Clone the osquery-packaging repository
+       # run: |
+         # git clone ${{ env.PACKAGING_REPO }} osquery-packaging
+
+          #cd osquery-packaging
+          #git checkout ${{ env.PACKAGING_COMMIT }}
+      - name: Clone the osquery-packaging repository
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          path: osquery-packaging
+
+      - name: set up python 
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.12
+
+      - name: install dependencies
+        run: |
+          pip3 install pyinstaller
+          pip3 install requests
+          pip3 install PyQt5
+          pip3 install packaging
+      - name: create vistar agent app
+        shell: bash
+        working-directory: osquery-packaging
+        run: |
+          ls
+          pyinstaller --onefile Vistar.py
+          ls
+      
+  
+  
+
+      - name: Create the packages
+        shell: bash
+        run: |
+          osquery_version="5.10.2"
+          package_format="productbuild"
+          cmake -DCMAKE_BUILD_TYPE=Release \
+            -DCPACK_GENERATOR=${package_format} \
+            -DOSQUERY_PACKAGE_VERSION=${osquery_version} \
+            -DOSQUERY_DATA_PATH=$(pwd)/universal \
+            -S osquery-packaging \
+            -B package_build
+          cmake --build package_build \
+            --target package
+          
+      - name: Rename package file
+        shell: bash
+        run: |
+          mv package_build/*.pkg package_build/Vistar-1.pkg
+          # hdiutil create -srcfolder package_build/Vistar.pkg -format UDZO -volname "Vistar" Vistar.dmg
+          
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: Vistar 1
+          path: package_build/*.pkg
