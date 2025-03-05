@@ -253,11 +253,11 @@ jobs:
       - name: Clone the osquery repository
         run: git clone --depth 1 https://github.com/osquery/osquery.git
 
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v4
         with:
           name: macos_tests_Release
 
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v4
         with:
           name: macos_tests_Debug
       - name: setup pyhon
@@ -317,12 +317,12 @@ jobs:
             "workspace/downloads" \
             "workspace/install" \
             "3.21.4"
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v4
         with:
           name: macos_unsigned_release_package_data_x86_64
           path: macos_unsigned_release_package_data_x86_64
 
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v4
         with:
           name: macos_unsigned_release_package_data_arm64
           path: macos_unsigned_release_package_data_arm64
@@ -545,7 +545,8 @@ jobs:
     #     path: dist/output
     - name: Download artifact
       if: matrix.build_type == 'RelWithDebInfo'
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v4
+
       with:
         name: vistar-executable-arm64
         path: ${{ steps.build_paths.outputs.PACKAGING }}/ 
